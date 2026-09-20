@@ -1,0 +1,10 @@
+{
+  "name": "vai2jev",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Jev-only proxy in front of the Vercel AI Gateway, speaking the @typesafe-ai/sdk protocol",
+  "scripts": {
+    "test": "node --test"
+  }
+}
