@@ -26,10 +26,15 @@ const json = (status, body) =>
 const err = (status, message, errorType = "invalid_request") =>
   json(status, { message, error_type: errorType });
 
-/** Constant-time compare; length differences leak but the secret's length is not the secret. */
+/**
+ * Constant-time compare; length differences leak but the secret's length is not the secret.
+ * An empty `b` never matches: a missing JEV_API_KEY must fail closed, not authenticate
+ * every caller and turn this into an open relay for the gateway key.
+ */
 function timingSafeEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length)
     return false;
+  if (b.length === 0) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
@@ -40,7 +45,7 @@ async function readJson(request, maxBytes) {
   const declared = Number(request.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > maxBytes) return undefined;
   const text = await request.text();
-  if (text.length > maxBytes) return undefined;
+  if (new TextEncoder().encode(text).length > maxBytes) return undefined;
   try {
     const body = JSON.parse(text);
     return body && typeof body === "object" && !Array.isArray(body)

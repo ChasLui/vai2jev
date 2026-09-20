@@ -39,6 +39,23 @@ test("rejects a bad token without ever reaching upstream", async () => {
   assert.equal(calls.length, 0, "upstream must not be called for unauthenticated requests");
 });
 
+test("fails closed when JEV_API_KEY is not configured", async () => {
+  const calls = stubFetch();
+  const configured = process.env.JEV_API_KEY;
+  delete process.env.JEV_API_KEY;
+  try {
+    // An unset secret must not authenticate an empty credential, which would make this
+    // proxy an open relay for the gateway key.
+    for (const headers of [{}, { authorization: "Bearer " }]) {
+      const res = await post({ state: "s", questions: QUESTIONS }, headers);
+      assert.equal(res.status, 401);
+    }
+    assert.equal(calls.length, 0);
+  } finally {
+    process.env.JEV_API_KEY = configured;
+  }
+});
+
 test("pins the model regardless of what the client asks for", async () => {
   const calls = stubFetch();
   await post({ model: "openai/gpt-5", state: "s", questions: QUESTIONS });
