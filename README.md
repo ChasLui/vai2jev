@@ -10,6 +10,10 @@ you hand out can only ever spend on Jev.
 No protocol translation is involved — the gateway already serves TypeSafe's own request and
 response shapes at `/typesafe/v1/systemone`.
 
+Yes/no questions are `type: "noul"` here, as in the TypeSafe SDK. The gateway's other Jev endpoint,
+`/v4/ai/evaluation-model`, calls the same thing `type: "boolean"` and rejects `noul` with a 400 —
+don't copy request bodies between the two.
+
 ## Use it
 
 ```ts
